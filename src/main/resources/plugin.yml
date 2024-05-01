@@ -1,0 +1,4 @@
+name: CitAuthPlugin
+version: '${project.version}'
+main: com.github.mam1zu.citauthplugin.CitAuthPlugin
+api-version: 1.20
