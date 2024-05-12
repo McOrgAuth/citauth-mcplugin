@@ -1,25 +1,32 @@
 package com.github.mam1zu.citauthplugin;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class CitAuthPlugin extends JavaPlugin {
-    String apihost = "172.24.241.112";
-    String apiport = "37564";
+    private final String apihost = "172.24.241.112";
+    private final String apiport = "37564";
+    private APIConnection apicon;
+    private CommandManager cm;
+    private JoinCheck jc;
     @Override
     public void onEnable() {
-        System.out.println(
-                "-----------------------------------------------------------------------------------------"+
-                " #####    ######  ######## ######   ##   ##  ######## ### ###           ##   ##   #####" +
-                "##   ##     ##    ## ## ##  ## ###   #   ##  ## ## ##  ## ##            #######  ##   ##"+
-                "##   ##     ##       ##     ##  ##  ##   ##     ##     ## ##            ## # ##  ##   ##"+
-                "##          ##       ##     ######  ##   ##     ##     #####    ######  ##   ##  ##"+
-                "##   ##     ##       ##     ##  ##  ##   ##     ##     #  ##            ##   ##  ##   ##"+
-                "##   ##     ##       ##     ##  ##  ### ###     ##     ## ##            ##   ##  ##   ##"+
-                " #####    ######    ####   ###  ##   #####     ####   ### ###           ##   ##   #####"+
-                "--------------------------------------UNDER CONSTRUCTION--------------------------------");
-        System.out.println("Developed by mam1zu(mam1zu.piyo@gmail.com)");
-        System.out.println("CAUTION: This plugin is under construction");
-        APIConnection con = new APIConnection(apihost, apiport);
+        Bukkit.getLogger().info("----------------------------------------------------------------------------------------");
+        Bukkit.getLogger().info(" #####    ######  ######## ######   ##   ##  ######## ### ###           ##   ##   ##### ");
+        Bukkit.getLogger().info("##   ##     ##    ## ## ##  ## ###   #   ##  ## ## ##  ## ##            #######  ##   ##");
+        Bukkit.getLogger().info("##   ##     ##       ##     ##  ##  ##   ##     ##     ## ##            ## # ##  ##   ##");
+        Bukkit.getLogger().info("##          ##       ##     ######  ##   ##     ##     #####    ######  ##   ##  ##     ");
+        Bukkit.getLogger().info("##   ##     ##       ##     ##  ##  ##   ##     ##     #  ##            ##   ##  ##   ##");
+        Bukkit.getLogger().info("##   ##     ##       ##     ##  ##  ### ###     ##     ## ##            ##   ##  ##   ##");
+        Bukkit.getLogger().info(" #####    ######    ####   ###  ##   #####     ####   ### ###           ##   ##   ##### ");
+        Bukkit.getLogger().info("--------------------------------------UNDER CONSTRUCTION--------------------------------");
+        Bukkit.getLogger().info("Developed by mam1zu(mam1zu.piyo@gmail.com)");
+        Bukkit.getLogger().warning("CAUTION: This plugin is under construction");
+
+        apicon = new APIConnection(this, apihost, apiport);
+        cm = new CommandManager(this, apicon);
+        jc = new JoinCheck(this, apicon);
+        getServer().getPluginManager().registerEvents(jc, this);
     }
 
     @Override
