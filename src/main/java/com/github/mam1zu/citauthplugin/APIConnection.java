@@ -16,10 +16,12 @@ import java.util.UUID;
 
 public class APIConnection {
     private String apihost;
-    private String apiport;
+    private int apiport;
     private JavaPlugin plugin;
-    public APIConnection(JavaPlugin plugin, String apihost, String apiport) {
+    private TokenManager mgr;
+    public APIConnection(JavaPlugin plugin, TokenManager mgr, String apihost, int apiport) {
         this.plugin = plugin;
+        this.mgr = mgr;
         this.apihost = apihost;
         this.apiport = apiport;
     }
@@ -110,8 +112,8 @@ public class APIConnection {
             return false;
         }
 
-        String uuid_tmp = uuid.toString().replace("-", "");
-        uuid = UUID.fromString(uuid_tmp.toLowerCase());
+        String uuid_str = uuid.toString().replace("-", "");
+        uuid_str = uuid_str.toLowerCase();
 
         try {
             url = new URL("http://"+this.apihost+":"+this.apiport+"/api/auth");
@@ -121,13 +123,25 @@ public class APIConnection {
             con.setDoInput(true);
             con.setUseCaches(false);
             con.setRequestProperty("Content-Type", "application/json;charset=utf-8");
+            con.setRequestProperty("Authorization", "Bearer ");
             con.connect();
+
             JSONObject body = new JSONObject();
-            body.put("uuid", uuid);
+            body.put("uuid", uuid_str);
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(con.getOutputStream(), "UTF-8"));
             writer.write(body.toString());
             writer.close();
             int responsecode = con.getResponseCode();
+            switch(responsecode) {
+                case 200:
+                    break;
+                case 401:
+                    Bukkit.getLogger().info("Invalid token.");
+                    break;
+                case 503:
+                    Bukkit.getLogger().info("API is temporarily unavailable.");
+                    break;
+            }
             result = responsecode == 200;
         } catch (MalformedURLException e) {
             e.printStackTrace();
