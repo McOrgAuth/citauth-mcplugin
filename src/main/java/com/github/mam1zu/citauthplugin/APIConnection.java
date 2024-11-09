@@ -1,16 +1,18 @@
 package com.github.mam1zu.citauthplugin;
 
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpRetryException;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.UUID;
 
 public class APIConnection {
     private String apihost;
@@ -84,28 +86,54 @@ public class APIConnection {
 
     public boolean authenticateUser(String mcid) {
 
+        String uuid_string = Bukkit.getOfflinePlayer(mcid).getUniqueId().toString();
+
+        if(uuid_string == null) {
+            Bukkit.getLogger().info("Player not found.");
+            return false;
+        }
+        UUID uuid = UUID.fromString(uuid_string);
+
+        return this.authenticateUser(uuid);
+
+    }
+
+    public boolean authenticateUser(UUID uuid) {
+
         boolean result = false;
         HttpURLConnection con = null;
         URL url;
 
-        try {
-            url = new URL("http://"+this.apihost+":"+this.apiport+"/api/authenticateUser/"+mcid);
-            Bukkit.getLogger().info(url.toString());
-            con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
-            con.setDoOutput(true);
-            int responseCode = con.getResponseCode();
-            result = (responseCode == 200);
-        } catch (MalformedURLException e) {
-            Bukkit.getLogger().warning("URL invalid");
-            e.printStackTrace();
-        } catch (IOException e) {
-            Bukkit.getLogger().warning("Connection failed");
-        } finally {
-            con.disconnect();
+
+        if(Bukkit.getOfflinePlayer(uuid) == null) {
+            Bukkit.getLogger().info("Player not found.");
+            return false;
         }
 
-        return result;
+        String uuid_tmp = uuid.toString().replace("-", "");
+        uuid = UUID.fromString(uuid_tmp.toLowerCase());
 
+        try {
+            url = new URL("http://"+this.apihost+":"+this.apiport+"/api/auth");
+            con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setDoOutput(true);
+            con.setDoInput(true);
+            con.setUseCaches(false);
+            con.setRequestProperty("Content-Type", "application/json;charset=utf-8");
+            con.connect();
+            JSONObject body = new JSONObject();
+            body.put("uuid", uuid);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(con.getOutputStream(), "UTF-8"));
+            writer.write(body.toString());
+            writer.close();
+            int responsecode = con.getResponseCode();
+            result = responsecode == 200;
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 }

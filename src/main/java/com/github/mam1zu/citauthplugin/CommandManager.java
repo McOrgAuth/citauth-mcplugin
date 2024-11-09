@@ -45,7 +45,7 @@ public class CommandManager implements CommandExecutor {
 
         if(args[0].equalsIgnoreCase("auth")) {
 
-            if(!(args.length == 2)) {
+            if(args.length != 2) {
                 sender.sendMessage("/citauth auth [MCID]");
                 return true;
             }
