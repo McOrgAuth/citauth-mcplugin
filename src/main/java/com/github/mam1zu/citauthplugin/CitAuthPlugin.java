@@ -6,7 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class CitAuthPlugin extends JavaPlugin {
-    private APIConnection apicon;
+    private ApiConnection apicon;
     private CommandManager cm;
     private JoinCheck jc;
     private ConfigManager config;
@@ -23,6 +23,7 @@ public final class CitAuthPlugin extends JavaPlugin {
         Bukkit.getLogger().info("##   ##     ##       ##     ##  ##  ### ###     ##     ## ##            ##   ##  ##   ##");
         Bukkit.getLogger().info(" #####    ######    ####   ###  ##   #####     ####   ### ###           ##   ##   ##### ");
         Bukkit.getLogger().info("--------------------------------------UNDER CONSTRUCTION--------------------------------");
+        Bukkit.getLogger().info("Copyright (c) 2024 mam1zu. All rights reserved.");
         Bukkit.getLogger().info("Developed by mam1zu(mam1zu.piyo@gmail.com)");
         Bukkit.getLogger().warning("CAUTION: This plugin is under construction");
 
@@ -32,7 +33,16 @@ public final class CitAuthPlugin extends JavaPlugin {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        apicon = new APIConnection(this, mgr, config.getHost(), config.getPort());
+        apicon = new ApiConnection(this, mgr, config.getHost(), config.getPort());
+
+        getLogger().info("Checking status of CITAUTH-API...");
+
+        if(apicon.checkStatus()) {
+            getLogger().info("CITAUTH-API is available.");
+        }
+        else
+            getLogger().warning("CITAUTH-API is temporarily unavailable.");
+
         cm = new CommandManager(this, apicon);
         jc = new JoinCheck(this, apicon);
         getServer().getPluginManager().registerEvents(jc, this);

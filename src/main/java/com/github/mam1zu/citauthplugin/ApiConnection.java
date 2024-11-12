@@ -14,12 +14,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
 
-public class APIConnection {
+public class ApiConnection {
     private String apihost;
     private int apiport;
     private JavaPlugin plugin;
     private TokenManager mgr;
-    public APIConnection(JavaPlugin plugin, TokenManager mgr, String apihost, int apiport) {
+    public ApiConnection(JavaPlugin plugin, TokenManager mgr, String apihost, int apiport) {
         this.plugin = plugin;
         this.mgr = mgr;
         this.apihost = apihost;
@@ -71,7 +71,7 @@ public class APIConnection {
 
     public boolean checkStatus() {
         try{
-            URL url = new URL("http://"+this.apihost+":"+this.apiport+"/api/checkStatus");
+            URL url = new URL("http://"+this.apihost+":"+this.apiport+"/api/status");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
             con.setDoOutput(true);
@@ -96,11 +96,11 @@ public class APIConnection {
         }
         UUID uuid = UUID.fromString(uuid_string);
 
-        return this.authenticateUser(uuid);
+        return this.authenticateUser(uuid, 0);
 
     }
 
-    public boolean authenticateUser(UUID uuid) {
+    public boolean authenticateUser(UUID uuid, int count) {
 
         boolean result = false;
         HttpURLConnection con = null;
@@ -123,7 +123,7 @@ public class APIConnection {
             con.setDoInput(true);
             con.setUseCaches(false);
             con.setRequestProperty("Content-Type", "application/json;charset=utf-8");
-            con.setRequestProperty("Authorization", "Bearer ");
+            con.setRequestProperty("Authorization", "Bearer "+mgr.getAccessToken());
             con.connect();
 
             JSONObject body = new JSONObject();
@@ -136,7 +136,9 @@ public class APIConnection {
                 case 200:
                     break;
                 case 401:
-                    Bukkit.getLogger().info("Invalid token.");
+                    if(count != 0) break;
+                    mgr.fetchToken();
+                    this.authenticateUser(uuid, 1);
                     break;
                 case 503:
                     Bukkit.getLogger().info("API is temporarily unavailable.");

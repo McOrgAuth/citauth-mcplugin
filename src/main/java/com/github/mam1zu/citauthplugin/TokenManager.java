@@ -3,6 +3,7 @@ package com.github.mam1zu.citauthplugin;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -15,8 +16,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.JSONObject;
 
-import com.google.gson.JsonObject;
-
 public class TokenManager {
     JavaPlugin plugin;
     FileConfiguration fc;
@@ -25,7 +24,9 @@ public class TokenManager {
     public TokenManager(JavaPlugin plugin) throws IOException, InvalidConfigurationException {
 
         this.plugin = plugin;
-        this.token_file = new File("./CitAuthPlugin/token.yml");
+        String token_path = this.plugin.getDataFolder().getAbsolutePath()+"/token.yml";
+        this.token_file = new File(token_path);
+        plugin.getLogger().info(token_path);
         this.fc = new YamlConfiguration();
 
         if(token_file.exists()) {
@@ -41,7 +42,56 @@ public class TokenManager {
     }
 
     public void refreshToken() {
+        HttpURLConnection con = null;
+        URL url;
 
+        String auth_host = this.plugin.getConfig().getString("auth_server.host");
+        String auth_port = this.plugin.getConfig().getString("auth_server.port");
+
+        try {
+            url = new URL("http://"+auth_host+":"+auth_port+"/auth/refreshtoken");
+            con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setDoOutput(true);
+            con.setDoInput(true);
+            con.setUseCaches(false);
+            con.setRequestProperty("Content-Type", "application/json;charset=utf-8");
+            con.connect();
+
+            JSONObject body = new JSONObject();
+            body.put("access_token", getAccessToken());
+            body.put("refresh_token", getRefreshToken());
+            
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(con.getOutputStream()));
+            plugin.getLogger().info(body.toString());
+            writer.write(body.toString());
+            writer.flush();
+            writer.close();
+
+            int responseCode = con.getResponseCode();
+
+            plugin.getLogger().info("token refresh status code: "+responseCode);
+
+            if(responseCode == 200) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                StringBuilder str = new StringBuilder();
+                String line;
+                while((line = reader.readLine()) != null) {
+                    str.append(line);
+                }
+                JSONObject token = new JSONObject(str.toString());
+                setAccessToken(token.getString("access_token"));
+                setRefreshToken(token.getString("refresh_token"));
+                save();
+            }
+            else {
+                //fetch pls xd
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean fetchToken() {
@@ -80,11 +130,21 @@ public class TokenManager {
                 while((line = reader.readLine()) != null) {
                     str.append(line);
                 }
-                JSONObject token = new JSONObject(line);
+                JSONObject token = new JSONObject(str.toString());
                 String access_token = token.getString("access_token");
                 String refresh_token = token.getString("refresh_token");
                 this.setAccessToken(access_token);
                 this.setRefreshToken(refresh_token);
+                this.save();
+            }
+            else if(responseCode == 401) {
+                String error = reader.readLine();
+                if(error == "expired_access_token") {
+
+                }
+                else if(error == "invalid_access_token" || error == "token_required") {
+
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -92,6 +152,8 @@ public class TokenManager {
 
         return result;
     }
+
+
 
     public void setAccessToken(String access_token) {
         fc.set("access_token", access_token);

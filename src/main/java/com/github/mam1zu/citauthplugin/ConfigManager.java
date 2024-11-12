@@ -10,19 +10,19 @@ public class ConfigManager {
     }
 
     public String getHost() {
-        return this.plugin.getConfig().getString("api.host");
+        return this.plugin.getConfig().getString("api_server.host");
     }
 
     public int getPort() {
-        return this.plugin.getConfig().getInt("api.port");
+        return this.plugin.getConfig().getInt("api_server.port");
     }
 
     public String getApiUserId() {
-        return this.plugin.getConfig().getString("api.userid");
+        return this.plugin.getConfig().getString("auth_server.userid");
     }
 
     public String getApiPassword() {
-        return this.plugin.getConfig().getString("api.password");
+        return this.plugin.getConfig().getString("auth_server.password");
     }
 
 }

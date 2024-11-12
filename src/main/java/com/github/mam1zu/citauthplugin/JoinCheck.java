@@ -1,25 +1,43 @@
 package com.github.mam1zu.citauthplugin;
 
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class JoinCheck implements Listener {
 
-    private APIConnection apicon;
+    private ApiConnection apicon;
     private JavaPlugin plugin;
-    private boolean useWhitelistTemporarily = false;
-    JoinCheck(JavaPlugin plugin, APIConnection apicon) {
+    
+    JoinCheck(JavaPlugin plugin, ApiConnection apicon) {
         this.plugin = plugin;
         this.apicon = apicon;
     }
 
     @EventHandler
-    public void onPlayerLoginEvent(PlayerLoginEvent event) {
+    public void onAsyncPlayerPreLoginEvent(AsyncPlayerPreLoginEvent event) {
+        if(plugin.getServer().getWhitelistedPlayers().contains(Bukkit.getOfflinePlayer(event.getUniqueId()))) {
+            plugin.getLogger().info("Whitelisted user: "+event.getName());
+            event.setLoginResult(AsyncPlayerPreLoginEvent.Result.ALLOWED);
+            return;
+        }
+        plugin.getLogger().info("Authenticating user...");
+        boolean result = apicon.authenticateUser(event.getUniqueId(), 0);
+        if(result) {
+            plugin.getLogger().info("Authentication succeeded: "+event.getName());
+            event.setLoginResult(AsyncPlayerPreLoginEvent.Result.ALLOWED);
+        }
+        else {
+            plugin.getLogger().info("Authentication failed: "+event.getName());
+            event.setKickMessage("[CITAUTH]You are not registered on CITAUTH-SYSTEM!");
+            event.setLoginResult(AsyncPlayerPreLoginEvent.Result.KICK_OTHER);
+        }
+    }
+    /* 
+    @EventHandler
+    public void onPlayerLoginEvent_old(PlayerLoginEvent event) {
         boolean result = false;
         if(!apicon.checkStatus()) {
             Bukkit.getLogger().warning("CITAUTH-API is temporally unavailable.");
@@ -43,16 +61,20 @@ public class JoinCheck implements Listener {
             }
         }
         else {
+            plugin.getLogger().info("Authenticating user...");
             result = apicon.authenticateUser(event.getPlayer().getName());
             if(result) {
                 event.setResult(PlayerLoginEvent.Result.ALLOWED);
+                plugin.getLogger().info("Authentication succeeded: "+event.getPlayer().getName());
                 return;
             }
             else {
                 event.setKickMessage("[CITAUTH]You are not registered on CITAUTH-SYSTEM!");
+                plugin.getLogger().info("Authentication failed: " +event.getPlayer().getName());
                 event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
                 return;
             }
         }
     }
+    */
 }
