@@ -86,7 +86,6 @@ public class ApiConnectionRunnable implements Runnable {
         String p_uuid = null;
 
         if(this.mcid != null) {
-            sender.sendMessage("here");
             if((p_uuid = Bukkit.getOfflinePlayer(this.mcid).getUniqueId().toString()) == null) {
                 return false;
             }

@@ -26,49 +26,6 @@ public class ApiConnection {
         this.apiport = apiport;
     }
 
-    @Deprecated
-    public boolean checkStatus_old() {
-        try {
-            Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
-            });
-
-            HttpURLConnection con = null;
-
-            URL url = new URL("http://"+this.apihost+":"+this.apiport+"/api/checkStatus");
-
-            con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
-            con.setDoOutput(true);
-
-            int responseCode = con.getResponseCode();
-
-            StringBuilder resBody = new StringBuilder();
-            String line = null;
-
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"))) {
-                while ((line = br.readLine()) != null) {
-                    resBody.append(line);
-                }
-            } catch(IOException e) {
-                e.printStackTrace();
-            }
-
-
-            con.disconnect();
-
-            switch (responseCode) {
-                case 200:
-                    return true;
-                default:
-                    return false;
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     public boolean checkStatus() {
         try{
             URL url = new URL("http://"+this.apihost+":"+this.apiport+"/api/status");
@@ -86,6 +43,7 @@ public class ApiConnection {
         return false;
     }
 
+    @Deprecated
     public boolean authenticateUser(String mcid) {
 
         String uuid_string = Bukkit.getOfflinePlayer(mcid).getUniqueId().toString();
@@ -131,20 +89,29 @@ public class ApiConnection {
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(con.getOutputStream(), "UTF-8"));
             writer.write(body.toString());
             writer.close();
-            int responsecode = con.getResponseCode();
-            switch(responsecode) {
+            int responseCode = con.getResponseCode();
+            switch(responseCode) {
                 case 200:
                     break;
                 case 401:
                     if(count != 0) break;
-                    mgr.fetchToken();
-                    this.authenticateUser(uuid, 1);
-                    break;
+
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+                    String error = reader.readLine();
+                    plugin.getLogger().info(error);
+
+                    if(error.equals("expired_access_token"))
+                        mgr.refreshToken();
+                    else
+                        mgr.fetchToken();
+
+                    return this.authenticateUser(uuid, 1);
                 case 503:
                     Bukkit.getLogger().info("API is temporarily unavailable.");
                     break;
             }
-            result = responsecode == 200;
+            return responseCode == 200;
+            
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {

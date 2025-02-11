@@ -117,7 +117,7 @@ public class TokenManager {
 
             JSONObject body = new JSONObject();
             body.put("userid", userid);
-            body.put("passhash", password);
+            body.put("password", password);
 
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(con.getOutputStream()));
             writer.write(body.toString());

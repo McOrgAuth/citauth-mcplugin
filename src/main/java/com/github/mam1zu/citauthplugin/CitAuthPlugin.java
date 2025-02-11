@@ -23,7 +23,7 @@ public final class CitAuthPlugin extends JavaPlugin {
         Bukkit.getLogger().info("##   ##     ##       ##     ##  ##  ### ###     ##     ## ##            ##   ##  ##   ##");
         Bukkit.getLogger().info(" #####    ######    ####   ###  ##   #####     ####   ### ###           ##   ##   ##### ");
         Bukkit.getLogger().info("--------------------------------------UNDER CONSTRUCTION--------------------------------");
-        Bukkit.getLogger().info("Copyright (c) 2024 mam1zu. All rights reserved.");
+        Bukkit.getLogger().info("Copyright (c) 2024-2025 mam1zu. All rights reserved.");
         Bukkit.getLogger().info("Developed by mam1zu(mam1zu.piyo@gmail.com)");
         Bukkit.getLogger().warning("CAUTION: This plugin is under construction");
 
