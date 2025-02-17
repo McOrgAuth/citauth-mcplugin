@@ -12,7 +12,10 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.UUID;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class ApiConnection {
     private String apihost;
@@ -27,9 +30,17 @@ public class ApiConnection {
     }
 
     public boolean checkStatus() {
-        try{
-            URL url = new URL("http://"+this.apihost+":"+this.apiport+"/api/status");
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        try {
+            URL url;
+            HttpURLConnection con;
+            if(this.plugin.getConfig().getBoolean("api_server.useSSL")) {
+                url = new URL("https://"+this.apihost+"/api/status");
+                con = (HttpsURLConnection) url.openConnection();
+            }
+            else {
+                url = new URL("http://"+this.apihost+":"+this.apiport+"/api/status");
+                con = (HttpURLConnection) url.openConnection();
+            }
             con.setRequestMethod("GET");
             con.setDoOutput(true);
             int responseCode = con.getResponseCode();
@@ -74,8 +85,14 @@ public class ApiConnection {
         uuid_str = uuid_str.toLowerCase();
 
         try {
-            url = new URL("http://"+this.apihost+":"+this.apiport+"/api/auth");
-            con = (HttpURLConnection) url.openConnection();
+            if(this.plugin.getConfig().getBoolean("api_server.useSSL")) {
+                url = new URL("https://"+this.apihost+"/api/auth");
+                con = (HttpsURLConnection) url.openConnection();
+            }
+            else {
+                url = new URL("http://"+this.apihost+":"+this.apiport+"/api/auth");
+                con = (HttpURLConnection) url.openConnection();
+            }
             con.setRequestMethod("POST");
             con.setDoOutput(true);
             con.setDoInput(true);

@@ -3,6 +3,7 @@ package com.github.mam1zu.citauthplugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class ConfigManager {
+
     JavaPlugin plugin;
     ConfigManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -23,6 +24,14 @@ public class ConfigManager {
 
     public String getApiPassword() {
         return this.plugin.getConfig().getString("auth_server.password");
+    }
+
+    public boolean getApiSSLStatus() {
+        return this.plugin.getConfig().getBoolean("api_server.useSSL");
+    }
+    
+    public boolean getAuthSSLStatus() {
+        return this.plugin.getConfig().getBoolean("auth_server.useSSL");
     }
 
 }

@@ -27,11 +27,10 @@ public class CommandManager implements CommandExecutor {
         }
 
         if(args.length == 0) {
-            sender.sendMessage("/citauth checkstatus: check the status of CITAUTH-API");
-            sender.sendMessage("/citauth auth [mcid]: check if the player is registered or not");
+            showHelpMessage(sender);
             return true;
         }
-        if(args[0].equalsIgnoreCase("checkstatus")) {
+        if(args[0].equalsIgnoreCase("status")) {
 
             sender.sendMessage("Trying to check the status of CITAUTH-API...");
 
@@ -44,8 +43,7 @@ public class CommandManager implements CommandExecutor {
                 return true;
             }
         }
-
-        if(args[0].equalsIgnoreCase("auth")) {
+        else if(args[0].equalsIgnoreCase("auth")) {
 
             if(args.length != 2) {
                 sender.sendMessage("/citauth auth [MCID]");
@@ -53,16 +51,24 @@ public class CommandManager implements CommandExecutor {
             }
             Matcher m = pattern.matcher(args[1]);
             if(!m.find()) {
-                sender.sendMessage("invalid username");
+                sender.sendMessage("invalid player name");
                 return true;
             }
 
             try {
                 Bukkit.getScheduler().runTaskAsynchronously(plugin, new ApiConnectionRunnable(plugin, new TokenManager(plugin), sender, args[1]));
+                return true;
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        else {
+            showHelpMessage(sender);
+        }
         return true;
+    }
+    public void showHelpMessage(CommandSender sender) {
+        sender.sendMessage("/citauth status: check the status of CITAUTH-API");
+        sender.sendMessage("/citauth auth [mcid]: check whether the player is registered or not");
     }
 }

@@ -1,8 +1,10 @@
 api_server:
-  host: '192.168.1.5'
-  port: 37564
+  host: 'citauth.chosuichi.com'
+  port: 443
+  useSSL: true # Do not change here.
 auth_server:
-  host: '192.168.1.5'
-  port: 37567
+  host: 'citauth.chosuichi.com'
+  port: 443
+  useSSL: true # Do not change here.
   userid: 'hogehoge'
   password: 'fugafuga'

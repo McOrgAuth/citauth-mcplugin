@@ -10,6 +10,8 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -49,8 +51,14 @@ public class TokenManager {
         String auth_port = this.plugin.getConfig().getString("auth_server.port");
 
         try {
-            url = new URL("http://"+auth_host+":"+auth_port+"/auth/refreshtoken");
-            con = (HttpURLConnection) url.openConnection();
+            if(this.plugin.getConfig().getBoolean("auth_server.useSSL")) {
+                url = new URL("https://"+auth_host+"/auth/refreshtoken");
+                con = (HttpsURLConnection) url.openConnection();
+            }
+            else {
+                url = new URL("http://"+auth_host+":"+auth_port+"/auth/refreshtoken");
+                con = (HttpURLConnection) url.openConnection();
+            }
             con.setRequestMethod("POST");
             con.setDoOutput(true);
             con.setDoInput(true);
@@ -106,8 +114,14 @@ public class TokenManager {
         String password = this.plugin.getConfig().getString("auth_server.password");
 
         try {
-            url = new URL("http://"+auth_host+":"+auth_port+"/auth/client");
-            con = (HttpURLConnection) url.openConnection();
+            if(this.plugin.getConfig().getBoolean("auth_server.useSSL")) {
+                url = new URL("https://"+auth_host+"/auth/client");
+                con = (HttpsURLConnection) url.openConnection();
+            }
+            else {
+                url = new URL("http://"+auth_host+":"+auth_port+"/auth/client");
+                con = (HttpURLConnection) url.openConnection();
+            }
             con.setRequestMethod("POST");
             con.setDoOutput(true);
             con.setDoInput(true);
@@ -157,10 +171,20 @@ public class TokenManager {
 
     public void setAccessToken(String access_token) {
         fc.set("access_token", access_token);
+        try {
+            this.save();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setRefreshToken(String refresh_token) {
         fc.set("refresh_token", refresh_token);
+        try {
+            this.save();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public String getAccessToken() {

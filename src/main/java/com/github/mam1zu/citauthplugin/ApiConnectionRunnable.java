@@ -10,6 +10,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.UUID;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -104,8 +106,14 @@ public class ApiConnectionRunnable implements Runnable {
         p_uuid = p_uuid.toLowerCase();
 
         try {
-            url = new URL("http://"+this.apihost+":"+this.apiport+"/api/auth");
-            con = (HttpURLConnection) url.openConnection();
+            if(this.plugin.getConfig().getBoolean("api_server.useSSL")) {
+                url = new URL("https://"+this.apihost+"/api/auth");
+                con = (HttpsURLConnection) url.openConnection();
+            }
+            else {
+                url = new URL("http://"+this.apihost+":"+this.apiport+"/api/auth");
+                con = (HttpURLConnection) url.openConnection();
+            }
             con.setRequestMethod("POST");
             con.setDoOutput(true);
             con.setDoInput(true);
