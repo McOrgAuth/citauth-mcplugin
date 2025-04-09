@@ -111,18 +111,32 @@ public class ApiConnection {
                 case 200:
                     break;
                 case 401:
-                    if(count != 0) break;
+                    if(count == 0) {
+                        //step 1: try refresh or fetch
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+                        String error = reader.readLine();
+                        plugin.getLogger().info(error);
 
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-                    String error = reader.readLine();
-                    plugin.getLogger().info(error);
+                        if(error.equals("expired_access_token"))
+                            mgr.refreshToken();
+                        else
+                            mgr.fetchToken();
+                        
+                        return this.authenticateUser(uuid, 1);
+                    }
+                    else if(count == 1) {
+                        //step 2: step 1 failed, then retry fetch
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+                        String error = reader.readLine();
+                        plugin.getLogger().info(error);
 
-                    if(error.equals("expired_access_token"))
-                        mgr.refreshToken();
-                    else
                         mgr.fetchToken();
+                        return this.authenticateUser(uuid, 2);
+                    }
+                    else {
+                        return false;
+                    }
 
-                    return this.authenticateUser(uuid, 1);
                 case 503:
                     Bukkit.getLogger().info("API is temporarily unavailable.");
                     break;

@@ -138,17 +138,30 @@ public class ApiConnectionRunnable implements Runnable {
                     plugin.getLogger().info("bad_request");
                     return false;
                 case 401:
-                    if(loop_count != 0) return false;
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-                    String error = reader.readLine();
-                    plugin.getLogger().info(error);
-                    if(error.equals("expired_access_token")) {
-                        mgr.refreshToken();
-                        plugin.getLogger().info("TOKEN_EXPIRED");
+                    if(loop_count == 0) {
+                        //step 1: try refresh or fetch
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+                        String error = reader.readLine();
+                        plugin.getLogger().info(error);
+                        if(error.equals("expired_access_token")) {
+                            mgr.refreshToken();
+                            plugin.getLogger().info("TOKEN_EXPIRED");
+                        }
+                        else
+                            mgr.fetchToken();
+                        return this.authenticateUser(1);
                     }
-                    else
+                    else if(loop_count == 1) {
+                        //step 2: step 1 failed, then retry fetch
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+                        String error = reader.readLine();
+                        plugin.getLogger().info(error);
+
                         mgr.fetchToken();
-                    return this.authenticateUser(1);
+                        return this.authenticateUser(2);
+                    }
+                case 503:
+                    sender.sendMessage("API seems unavailable now.");
                 default:
                     return false;
             }
