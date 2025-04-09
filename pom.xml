@@ -6,7 +6,7 @@
 
     <groupId>com.github.mam1zu</groupId>
     <artifactId>CitAuthPlugin</artifactId>
-    <version>1.0.0-beta1</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>CitAuthPlugin</name>
@@ -22,7 +22,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
-                <configuration>
+		<configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                 </configuration>
@@ -75,7 +75,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20240303</version>
+            <version>20250107</version>
         </dependency>
     </dependencies>
 </project>
