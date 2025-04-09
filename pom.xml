@@ -6,7 +6,7 @@
 
     <groupId>com.github.mam1zu</groupId>
     <artifactId>CitAuthPlugin</artifactId>
-    <version>1.0.0-beta2</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>CitAuthPlugin</name>
